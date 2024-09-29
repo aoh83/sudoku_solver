@@ -7,10 +7,6 @@
 using namespace std;
 
 
-
-
-
-
 int main(int argc, char **argv) {
     bs input[9][9];
     from_file(std::cin, input);
@@ -20,7 +16,6 @@ int main(int argc, char **argv) {
     auto ret = s.solve();
 
     if (ret == 0) {
-        s.print();
     } else { 
         std::cout << "unsolvable\n";
     }
