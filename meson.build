@@ -5,9 +5,11 @@ project('sudoku_solver', 'cpp',
 gtest_dep = dependency('gtest', version : '1.15.0')
 gmock_dep = dependency('gmock', version : '1.15.0')
 gtest_main_dep = dependency('gtest_main', version : '1.15.0')
+boost_dep = dependency('boost', version: '1.86.0')
 
+deps = [ boost_dep ]
 
-slib = library('sudokulib', 'src/sudoku.cc')
+slib = library('sudokulib', 'src/sudoku.cc', dependencies: [ boost_dep ])
 
 incdir = include_directories('src') # FIXME: move to include
 
@@ -16,6 +18,7 @@ executable('sudoku_solver',
            'main.cc',
            link_with: slib,
            include_directories: incdir,
+           dependencies: deps,
            install : true)
 
 tests_src = [
@@ -28,6 +31,7 @@ e = executable(
   dependencies : [
     gtest_dep,
     gtest_main_dep,
+    deps
   ],
   link_with: slib,
   include_directories:incdir

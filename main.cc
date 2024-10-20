@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     auto ret = s.solve();
 
     if (ret == 0) {
+        s.print();
     } else { 
         std::cout << "unsolvable\n";
     }

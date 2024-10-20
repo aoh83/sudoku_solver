@@ -1,48 +1,62 @@
 #include "sudoku.h"
 
+#include <vector>
+#include <array>
+#include <stack>
+#include <cassert>
+
+std::optional<u16> first(const bs &b) {
+    for (u16 i = 1, e = b.size(); i < e; i++) {
+        if (b.test(i)) {
+            return std::optional<u16>(i);
+        }
+    }
+    return {};
+}
+
 void sudoku::exclude_line(u16 line) {
-    bs excludes = non();
+    bs excludes;
     for (u16 i = 0; i < 9; i++) {
-        if (field[line][i].only_one()) {
-            excludes.clear(field[line][i].first().value());
+        if (field[line][i].count() == 1) {
+            excludes.reset(first(field[line][i]).value());
         }
     }
     for (u16 i = 0; i < 9; i++) {
-        if (!field[line][i].only_one()) {
-            field[line][i].intersect(excludes);
+        if (field[line][i].count() != 1) {
+            field[line][i] &= (excludes);
         }
     }
 }
 
 void sudoku::exclude_row(u16 row) {
-    bs excludes = non();
+    bs excludes;
     for (u16 i = 0; i < 9; i++) {
-        if (field[i][row].only_one()) {
-            excludes.clear(field[i][row].first().value());
+        if (field[i][row].count() == 1) {
+            excludes.reset(first(field[i][row]).value());
         }
     }
     for (u16 i = 0; i < 9; i++) {
-        if (!field[i][row].only_one()) {
-            field[i][row].intersect(excludes);
+        if (field[i][row].count() != 1) {
+            field[i][row] &= (excludes);
         }
     }
 }
 
 void sudoku::exclude_square(int sqrow, int sqcol) {
-    auto excludes = non();
+    bs excludes;
     for (u16 x = 0; x < 3; x++) {
         for (u16 y = 0; y < 3; y++) {
-            if (field[3 * sqrow + x][3 * sqcol + y].only_one()) {
-                auto value = field[3 * sqrow + x][3 * sqcol + y].first().value();
-                excludes.clear(value);
+            if (field[3 * sqrow + x][3 * sqcol + y].count() == 1) {
+                auto value = first(field[3 * sqrow + x][3 * sqcol + y]).value();
+                excludes.reset(value);
             }
         }
     }
 
     for (u16 x = 0; x < 3; x++) {
         for (u16 y = 0; y < 3; y++) {
-            if (!field[3 * sqrow + x][3 * sqcol + y].only_one()) {
-                field[3 * sqrow + x][3 * sqcol + y].intersect(excludes);
+            if (field[3 * sqrow + x][3 * sqcol + y].count() != 1) {
+                field[3 * sqrow + x][3 * sqcol + y] &= excludes;
             }
         }
     }
@@ -73,17 +87,25 @@ int sudoku::solve() {
     return 0;
 }
 
+void sudoku::print() {
+}
+
 // how to pass a 2d array:  https://stackoverflow.com/a/17569578/887836
 void from_file(std::istream &input, bs (&output)[9][9]) {
-    char buf[16];
+    std::array<char, 16> buf;
     for (auto i = 0; i < 9; i++) {
-        input.getline(buf, sizeof(buf));
+        input.getline(buf.data(), buf.size());
         for (auto j = 0; j < 9; j++) {
             if (buf[j] == ' ') {
-                output[i][j] = non();
+                output[i][j] |= 0x01ff; // set [0 .. 8
                 continue;
             }
-            output[i][j] = of(buf[j] - '0');
+            
+            if (!(buf[j] >= '1' && buf[j] <= '9')) {
+                continue;
+            }
+
+            output[i][j].set(buf[j] - '0' - 1);
         }
     }
 }
