@@ -1,25 +1,20 @@
-#include <cstdio>
-#include <cassert>
 #include <iostream>
 
 #include "sudoku.h"
 
 using namespace std;
 
-
 int main(int argc, char **argv) {
-    bs input[9][9];
-    from_file(std::cin, input);
+  field_t input;
+  from_file(std::cin, input);
 
-    sudoku s = std::move(input);
+  auto ret = solve(input);
 
-    auto ret = s.solve();
+  if (ret.has_value()) {
+    print(ret.value());
+  } else {
+    std::cout << "unsolvable\n";
+  }
 
-    if (ret == 0) {
-        s.print();
-    } else { 
-        std::cout << "unsolvable\n";
-    }
-
-    return 0;
+  return 0;
 }
