@@ -22,23 +22,8 @@ template <typename iterator> bs to_bs(iterator begin, iterator end) {
   return ret;
 }
 
-template <typename it> bool is_unique(const it &b, const it &e) {
-  bs items;
-  for (auto i = b; i != e; i++) {
-    if (*i == 0) {
-      continue;
-    }
-    if (items.test(*i)) {
-      return false;
-    }
-    items.set(*i);
-  }
-
-  return true;
-}
-
 bool check(field_t &f) { // TODO: duplicate const?
-  for (u8 i = 0; i < 10; i++) {
+  for (u8 i = 0; i < 9; i++) {
     if (!is_unique(row_iterator(f, i, 0), row_iterator(f, i, 9))) {
       return false;
     }
@@ -60,8 +45,12 @@ static std::optional<field_t> solve(field_t f, u8 i) {
     return {};
   }
 
+  if (f[i / 9][i % 9] != 0) {
+    return solve(f, i + 1);
+  }
+
   for (int x = 1; x < 10; x++) {
-    f[x / 9][x % 9] = x;
+    f[i / 9][i % 9] = x;
 
     auto r = solve(f, i + 1);
     if (r.has_value()) {
@@ -75,8 +64,8 @@ static std::optional<field_t> solve(field_t f, u8 i) {
 std::optional<field_t> solve(field_t field) { return solve(field, 0); }
 
 void print(const field_t &f) {
-  for (auto x = 0; x < 10; x++) {
-    for (auto y = 0; y < 10; y++) {
+  for (auto x = 0; x < 9; x++) {
+    for (auto y = 0; y < 9; y++) {
       std::cout << f[x][y] << " ";
     }
     std::cout << "\n";
@@ -86,20 +75,47 @@ void print(const field_t &f) {
 
 // how to pass a 2d array:  https://stackoverflow.com/a/17569578/887836
 void from_file(std::istream &input, field_t &output) {
-  std::array<char, 16> buf;
+  std::array<u8, 16> buf;
   for (auto i = 0; i < 9; i++) {
-    input.getline(buf.data(), buf.size());
+    input.getline((char *)buf.data(), buf.size());
     for (auto j = 0; j < 9; j++) {
       if (buf[j] == ' ') {
         output[i][j] = 0;
         continue;
       }
 
-      if (!(buf[j] >= '1' && buf[j] <= '9')) {
+      if ((buf[j] < '1' || buf[j] > '9')) {
+        output[i][j] = 0;
+        std::cout << "not a number:" << buf[j] << "on (" << i << ", " << j
+                  << ")" << std::endl;
         continue;
       }
 
       output[i][j] = buf[j] - '0';
     }
   }
+}
+
+field_t from_file(std::istream &input) {
+  field_t output;
+  std::array<u8, 16> buf;
+  for (auto i = 0; i < 9; i++) {
+    input.getline((char *)buf.data(), buf.size());
+    for (auto j = 0; j < 9; j++) {
+      if (buf[j] == ' ') {
+        output[i][j] = 0;
+        continue;
+      }
+
+      if ((buf[j] < '1' || buf[j] > '9')) {
+        output[i][j] = 0;
+        std::cout << "not a number:" << buf[j] << "on (" << i << ", " << j
+                  << ")" << std::endl;
+        continue;
+      }
+
+      output[i][j] = buf[j] - '0';
+    }
+  }
+  return output;
 }

@@ -9,7 +9,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-using bs = std::bitset<9>;
+using bs = std::bitset<10>;
 
 static const bs ALL = 9;
 
@@ -62,7 +62,7 @@ private:
 };
 
 class sq_iterator
-    : public boost::iterator_facade<row_iterator, u8,
+    : public boost::iterator_facade<sq_iterator, u8,
                                     boost::random_access_traversal_tag> {
 public:
   sq_iterator(field_t &s, u8 sq, u8 start = 0) : s_(s), sq_(sq), it_(start) {}
@@ -78,16 +78,16 @@ private:
   }
 
   u8 &dereference() const {
-    auto sq_x = sq_ / 3;
-    auto sq_y = sq_ % 3;
+    auto sq_row = sq_ / 3;
+    auto sq_col = sq_ % 3;
 
-    auto it_x = it_ / 3;
-    auto it_y = it_ % 3;
+    auto it_row = it_ / 3;
+    auto it_col = it_ % 3;
 
-    auto x = sq_x * 3 + it_x;
-    auto y = sq_y * 3 + it_y;
+    auto row = sq_row * 3 + it_row;
+    auto col = sq_col * 3 + it_col;
 
-    return s_[x][y];
+    return s_[row][col];
   }
 
   field_t &s_;
@@ -95,6 +95,23 @@ private:
   u8 it_;
 };
 
+template <typename it> bool is_unique(const it &b, const it &e) {
+  bs items;
+  for (auto i = b; i != e; i++) {
+    if (*i == 0) {
+      continue;
+    }
+    if (items.test(*i)) {
+      return false;
+    }
+    items.set(*i);
+  }
+
+  return true;
+}
+
 void print(const field_t &f);
 std::optional<field_t> solve(field_t f);
+bool check(field_t &f);
 void from_file(std::istream &input, field_t &output);
+field_t from_file(std::istream &input);
