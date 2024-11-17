@@ -1,4 +1,5 @@
 build/**
+build-rel/**
 .idea/**
 .vscode/**
 .cache/**
