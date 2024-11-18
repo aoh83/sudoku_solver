@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <optional>
+#include <spdlog/spdlog.h>
 
 std::optional<u16> first(const bs &b) {
   for (u16 i = 1, e = b.size(); i < e; i++) {
